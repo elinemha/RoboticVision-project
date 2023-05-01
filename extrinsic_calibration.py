@@ -2,6 +2,9 @@ import glob
 import numpy as np
 import cv2 as cv
 from os.path import join
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
+from rootsift import RootSIFT
 
 # Load images
 left_images = glob.glob("data/left/extrinsic_calibration/*.jpeg")
@@ -54,16 +57,14 @@ for i in range(N_images):
     if ok_left:
         corners_left = cv.cornerSubPix(I_left, corners_left, (11,11), (-1,-1), subpix_criteria)
         cv.drawChessboardCorners(I_left, board_size, corners_left, ok_left)
-        cv.imshow('img', I_left)
-        k = cv.waitKey(500)
+        cv.imwrite(f"output/left/{i}.jpg", I_left)
         corner_coords_image_left.append(corners_left)
 
     ok_right, corners_right = cv.findChessboardCorners(I_right, (board_size[0],board_size[1]), flags=cv.CALIB_CB_ADAPTIVE_THRESH)
     if ok_right:
         corners_right = cv.cornerSubPix(I_right, corners_right, (11,11), (-1,-1), subpix_criteria)
-        cv.drawChessboardCorners(I_right, board_size, corners_left, ok_right)
-        cv.imshow('img', I_right)
-        k = cv.waitKey(500)
+        cv.drawChessboardCorners(I_right, board_size, corners_right, ok_right)
+        cv.imwrite(f"output/right/{i}.jpg", I_right)
         corner_coords_image_right.append(corners_right)
 
     print(f"OK for image pair {i}")
@@ -76,6 +77,52 @@ ok, _, _, _, _, R, T, _, _ = cv.stereoCalibrate(corner_coords_world, corner_coor
 
 if ok:
     print("Calibrated successfully :)")
+    print(R)
+    np.savetxt("test.txt", R)
     print(T)
 else:
     print("Unsuccessful calibration ):")
+
+# 3D plot of estimated camera setup
+# Define the rotation and translation matrices for camera 1
+R1 = np.eye(3) # rotation matrix
+T1 = np.array([0,0,0]) # translation matrix
+
+# Define the rotation and translation matrices for camera 2
+R2 = R
+T2 = T
+
+# Define the camera coordinate system
+cam_origin = np.array([0, 0, 0]) # camera origin
+cam_x = np.array([1, 0, 0]) # camera x-axis
+cam_y = np.array([0, 1, 0]) # camera y-axis
+cam_z = np.array([0, 0, 1]) # camera z-axis
+
+# Apply the rotation and translation to the camera coordinate system for camera 1
+cam_origin1 = R1 @ cam_origin + T1
+cam_x1 = R1 @ cam_x
+cam_y1 = R1 @ cam_y
+cam_z1 = R1 @ cam_z
+
+# Apply the rotation and translation to the camera coordinate system for camera 2
+cam_origin2 = R2 @ cam_origin + T2
+cam_x2 = R2 @ cam_x
+cam_y2 = R2 @ cam_y
+cam_z2 = R2 @ cam_z
+
+# Plot the camera coordinate systems
+fig = plt.figure()
+ax = fig.add_subplot(111, projection='3d')
+ax.quiver(cam_origin1[0], cam_origin1[1], cam_origin1[2], 50*cam_x1[0], 50*cam_x1[1], 50*cam_x1[2], color='r')
+ax.quiver(cam_origin1[0], cam_origin1[1], cam_origin1[2], 50*cam_y1[0], 50*cam_y1[1], 50*cam_y1[2], color='g')
+ax.quiver(cam_origin1[0], cam_origin1[1], cam_origin1[2], 50*cam_z1[0], 50*cam_z1[1], 50*cam_z1[2], color='b')
+ax.quiver(cam_origin2[0], cam_origin2[1], cam_origin2[2], 50*cam_x2[0], 50*cam_x2[1], 50*cam_x2[2], color='r')
+ax.quiver(cam_origin2[0], cam_origin2[1], cam_origin2[2], 50*cam_y2[0], 50*cam_y2[1], 50*cam_y2[2], color='g')
+ax.quiver(cam_origin2[0], cam_origin2[1], cam_origin2[2], 50*cam_z2[0], 50*cam_z2[1], 50*cam_z2[2], color='b')
+ax.set_xlim([-100, 100])
+ax.set_ylim([-100, 100])
+ax.set_zlim([-100, 100])
+ax.set_xlabel("x")
+ax.set_ylabel("y")
+ax.set_zlabel("z")
+plt.show()
