@@ -4,7 +4,6 @@ import cv2 as cv
 from os.path import join
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
-from rootsift import RootSIFT
 
 # Load images
 left_images = glob.glob("data/left/extrinsic_calibration/*.jpeg")
