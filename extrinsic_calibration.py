@@ -83,13 +83,17 @@ else:
     print("Unsuccessful calibration ):")
 
 # 3D plot of estimated camera setup
-# Define the rotation and translation matrices for camera 1
+# Define the rotation and translation matrices for camera 1 (right camera)
 R1 = np.eye(3) # rotation matrix
 T1 = np.array([0,0,0]) # translation matrix
 
-# Define the rotation and translation matrices for camera 2
+
+# Define the rotation and translation matrices for camera 2 (left camera)
 R2 = R
 T2 = T
+
+np.save(join('calibration/right', 'R1.npy'), R1)
+np.save(join('calibration/left', 'R2.npy'), R2)
 
 # Define the camera coordinate system
 cam_origin = np.array([0, 0, 0]) # camera origin
