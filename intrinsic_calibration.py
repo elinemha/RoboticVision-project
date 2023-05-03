@@ -96,4 +96,3 @@ for camera in ['left','right']:
     np.savetxt(join(output_folder, 'mean_errors.txt'), mean_errors)
     np.savetxt(join(output_folder, 'std_int.txt'), std_int) # Standard deviations of intrinsics (entries in K and distortion coefficients)
     print('Calibration data is saved in the folder "%s"' % realpath(output_folder))
-

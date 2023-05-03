@@ -95,6 +95,9 @@ T2 = T
 np.save(join('calibration/right', 'R1.npy'), R1)
 np.save(join('calibration/left', 'R2.npy'), R2)
 
+np.save(join('calibration/right', 't1.npy'), T1)
+np.save(join('calibration/left', 't2.npy'), T2)
+
 # Define the camera coordinate system
 cam_origin = np.array([0, 0, 0]) # camera origin
 cam_x = np.array([1, 0, 0]) # camera x-axis
