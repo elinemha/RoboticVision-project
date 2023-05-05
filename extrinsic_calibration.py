@@ -6,9 +6,9 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 
 # Load images
-left_images = glob.glob("data/left/extrinsic_calibration/*.jpeg")
+left_images = glob.glob("data2/left/extrinsic_calibration/*.jpeg")
 left_images.sort()
-right_images = glob.glob("data/right/extrinsic_calibration/*.jpeg")
+right_images = glob.glob("data2/right/extrinsic_calibration/*.JPG")
 right_images.sort()
 N_images = len(left_images)
 image_size = None

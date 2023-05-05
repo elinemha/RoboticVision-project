@@ -64,19 +64,30 @@ RT2[:,:3] = R2
 RT2[:,3:] = T2.reshape([3,1])
 P2 = K_left @ RT2 #projection matrix for C2 (left camera)
 
-# Triangulate in image pair 1
-points_homogeneous_r = cv.triangulatePoints(P1, P2, right_markers[4:8, :].T, right_markers[8:12, :].T) # Right cone, image pair 1
-points_3d_r = np.divide(points_homogeneous_r[:3, :], points_homogeneous_r[3,:])
+left_markers_blue = np.array([
+    [1539.0, 1756.0, 2351.0],
+    [2113.0, 1896.0, 1965.0]
+])
+left_markers_yellow = np.array([
+    [3321.0, 2553.0, 3459.0],
+    [2104.0, 1887.0, 2035.0]
+])
 
-points_homogeneous_l = cv.triangulatePoints(P1, P2, left_markers[4:8, :].T, left_markers[8:12, :].T) # Left cone, image pair 1
-points_3d_l = np.divide(points_homogeneous_l[:3, :], points_homogeneous_l[3,:])
+right_markers_blue = np.array([
+    [698.0, 1271.0, 1851.0],
+    [2103.0, 1874.0, 1948.0]
+])
+right_markers_yellow = np.array([
+    [2688.0, 2162.0, 2972.0],
+    [2121.0, 1876.0, 2047.0]
+])
 
-# Triangulate in image pair 2
-points_homogeneous_r2 = cv.triangulatePoints(P1, P2, right_markers[:4, :].T, right_markers[12:16, :].T) # Right cone, image pair 1
-points_3d_r2 = np.divide(points_homogeneous_r2[:3, :], points_homogeneous_r2[3,:])
+# Triangulate
+points_homogeneous_blue = cv.triangulatePoints(P1, P2, right_markers_blue, left_markers_blue) # Blue cone, all images
+points_3d_blue = np.divide(points_homogeneous_blue[:3, :], -points_homogeneous_blue[3,:])
 
-points_homogeneous_l2 = cv.triangulatePoints(P1, P2, left_markers[:4, :].T, left_markers[12:16, :].T) # Left cone, image pair 1
-points_3d_l2 = np.divide(points_homogeneous_l2[:3, :], points_homogeneous_l2[3,:])
+points_homogeneous_yellow = cv.triangulatePoints(P1, P2, right_markers_yellow, left_markers_yellow) # Yellow cone, all images
+points_3d_yellow = np.divide(points_homogeneous_yellow[:3, :], -points_homogeneous_yellow[3,:])
 
 # Plot extrinsic calibration
 R1 = np.load(join('calibration/right', 'R1.npy'))
@@ -88,13 +99,13 @@ T2 = np.load(join('calibration/left', 't2.npy'))
 
 # Cone ground truth
 # Left cone
-LC1 = (R2@np.array([-30, 0, 269])).reshape([3,1]) + T2.reshape([3,1])
-#LC2 = (R2@np.array([-30, 0, 269])).reshape([3,1]) + T2.reshape([3,1])
+LC1 = np.array([-102, 0, 228]).reshape([3,1])
+LC2 = np.array([-94, 0, 385]).reshape([3,1])
 
 
 # Right cone
-RC1 = (R2@np.array([90, 0, 263])).reshape([3,1]) + T2.reshape([3,1])
-#RC2 = (R2@np.array([90, 0, 263])).reshape([3,1]) + T2.reshape([3,1])
+RC1 = np.array([56, 0, 228]).reshape([3,1])
+RC2 = np.array([62, 0, 385]).reshape([3,1])
 
 # Define the camera coordinate system
 cam_origin = np.array([0, 0, 0]) # camera origin
@@ -131,19 +142,15 @@ ax.set_ylabel("y")
 ax.set_zlabel("z")
 
 # Plot estimated cone coordinates
-# Image pair 1
-ax.scatter(points_3d_r[0,:],points_3d_r[1,:],points_3d_r[2,:], label="Right cone")
-ax.scatter(points_3d_l[0,:],points_3d_l[1,:],points_3d_l[2,:], label="Left cone")
-
-# Image pair 2
-ax.scatter(points_3d_r2[0,:],points_3d_r2[1,:],points_3d_r2[2,:], label="Right cone")
-ax.scatter(points_3d_l2[0,:],points_3d_l2[1,:],points_3d_l2[2,:], label="Left cone")
+n = 2
+ax.scatter(points_3d_blue[0,:n],points_3d_blue[1,:n],points_3d_blue[2,:n], label="Blue cone")
+ax.scatter(points_3d_yellow[0,:n],points_3d_yellow[1,:n],points_3d_yellow[2,:n], label="Yellow cone")
 
 # Plot ground truth cone coordinates
-#ax.scatter(LC1[0], LC1[1], LC1[2], label="Ground truth")
-#ax.scatter(RC1[0], RC1[1], RC1[2], label="Ground truth")
+ax.scatter(LC1[0], LC1[1], LC1[2], label="Ground truth left cone 1 ")
+ax.scatter(RC1[0], RC1[1], RC1[2], label="Ground truth right cone 1")
+ax.scatter(LC2[0], LC2[1], LC2[2], label="Ground truth left cone 2")
+ax.scatter(RC2[0], RC2[1], RC2[2], label="Ground truth right cone 2")
 
 plt.legend()
 plt.show()
-
-print("Z difference left cone:", points_3d_r[2,:] - points_3d_r2[2,:])

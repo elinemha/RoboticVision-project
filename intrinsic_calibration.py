@@ -14,7 +14,7 @@ for camera in ['left','right']:
     # This string should point to the folder containing the images
     # used for calibration. The same folder will hold the output.
     # "*.jpg" means that any file with a .jpg extension is used
-    image_path_pattern = f'data/{camera}/intrinsic_calibration/*.jpeg'
+    image_path_pattern = f'data2/{camera}/extrinsic_calibration/*'
     output_folder = f'calibration/{camera}'
 
     board_size  = (4,7) # Number of internal corners of the checkerboard (see tutorial)
@@ -42,7 +42,7 @@ for camera in ['left','right']:
     # if present in the output folder. You can delete the 'u_all.npy'
     # file to force the script to re-detect all the corners.
     #
-    if exists(join(output_folder, 'u_all.npy')):
+    if not exists(join(output_folder, 'u_all.npy')):
         u_all = np.load(join(output_folder, 'u_all.npy'))
         X_all = np.load(join(output_folder, 'X_all.npy'))
         image_size = np.loadtxt(join(output_folder, 'image_size.txt')).astype(np.int32)
